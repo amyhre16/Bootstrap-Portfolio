@@ -9,7 +9,7 @@ $(document).ready(function() {
 			_message: message,
 			_email: email
 		};
-		$.post(window.location.origin + '/api/sendEmail', emailInfo, function(data) {
+		$.post('http://localhost:5000/api/sendEmail', emailInfo, function(data) {
 			console.log("Your email has been sent!");
 		});
 		
