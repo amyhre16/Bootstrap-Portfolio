@@ -63,6 +63,6 @@ app.post('/api/sendEmail', function(req, res) {
 	});
 }*/
 
-app.listen(PORT, function() {
+app.listen(process.env.PORT || 5000, function() {
 	console.log("Server is listening to port " + PORT);
 });
