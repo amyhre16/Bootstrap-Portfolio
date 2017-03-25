@@ -4,65 +4,47 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
-var SparkPost = require('sparkpost');
-var env = require('envs');
-
-var sparky = new SparkPost();
+var nodemailer = require('nodemailer');
 
 var app = express();
-var PORT = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text());
 app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 
-app.post('/api/sendEmail', function(req, res) {
-	var _name = req.body.name;
-	var _email = req.body.email;
-	var _message = req.body.message;
+app.post('/sendEmail', function(req, res) {
+	var name = req.body.name;
+	var email = req.body.email;
+	var message = req.body.message;
 
-	sparky.transmissions.send({
-		content: {
-			from: _email,
-			subject: _name + "'s Message",
-			html: "<html><body><p>" + _message + "</p></body></html>"
-		},
-		recipients: [
-		{address: 'anthony.myhre@utexas.edu'}
-		]
-	})
-	.then(data => {
-		console.log('Woohoo! You just sent your first mailing!');
-		console.log(data);
-	})
-	.catch(err => {
-		console.log('Whoops! Something went wrong');
-		console.log(err);
-	})
+	// create reusable transporter object using the default SMTP transport
+	var transporter = nodemailer.createTransport({
+		service: 'gmail',
+		auth: {
+			user: 'gmail.user@gmail.com',
+			pass: 'yourpass'
+		}
+	});
 
-	// sendEmail(_name, _email, _subject, _message);
+	// setup email data with unicode symbols
+	var mailOptions = {
+		from: '"Fred Foo 👻" <foo@blurdybloop.com>', // sender address
+		to: 'bar@blurdybloop.com, baz@blurdybloop.com', // list of receivers
+		subject: 'Hello ✔', // Subject line
+		text: 'Hello world ?', // plain text body
+		html: '<b>Hello world ?</b>' // html body
+	};
+
+	// send mail with defined transport object
+	transporter.sendMail(mailOptions, (error, info) => {
+		if (error) {
+			return console.log(error);
+		}
+		console.log('Message %s sent: %s', info.messageId, info.response);
+	});
 });
 
-/*function sendEmail(_name, _email, _subject, _message) {
-	nodeMandrill('/messages/send', {
-		message: {
-			to: [{
-				email: 'anthony.myhre@utexas.edu',
-				name: 'Anthony Myhre'
-			}],
-			from_email: _email,
-			subject: _subject,
-			text: _message
-		}
-	}, function(error, response) {
-		if (error) {
-			throw error;
-		}
-
-	});
-}*/
-
-app.listen(process.env.PORT || 5000, function() {
+app.listen(process.env.PORT || 3000, function() {
 	console.log("Server is listening to port " + PORT);
 });
